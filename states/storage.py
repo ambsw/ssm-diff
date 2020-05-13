@@ -172,6 +172,7 @@ class SecretJSONBranch(JSONBranch, Secret):
 
 
 yaml.SafeLoader.add_constructor(SecureTag.yaml_tag, SecureTag.from_yaml)
+yaml.SafeDumper.add_multi_representer(SecureTag, SecureTag.to_yaml)
 # backwards compatibility
 yaml.SafeLoader.add_constructor(SecureString.yaml_tag, SecureTag.from_yaml)
 # yaml.SafeDumper.add_multi_representer(SecureTag, SecureTag.to_yaml)

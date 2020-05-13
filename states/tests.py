@@ -594,6 +594,17 @@ class SecureJSONBranch(TestCase):
         )
 
 
+class SecureTag(TestCase):
+
+    def test_secure_tag(self):
+        obj = {"test": storage.SecureTag('test_value')}
+        output = yaml.safe_dump(obj)
+        self.assertEqual(
+            repr(output),
+            repr('test: !secure \'test_value\'\n'),
+        )
+
+
 class ParameterStore(TestCase):
 
     def setUp(self) -> None:
