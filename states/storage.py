@@ -86,11 +86,9 @@ class Secret(yaml.YAMLObject):
         return "{}(secret={!r}, metadata={!r})".format(self.__class__.__name__, self.secret, self.metadata)
 
     def __eq__(self, other):
-        if self.metadata.get(self.METADATA_ENCRYPTED, False) != other.metadata.get(self.METADATA_ENCRYPTED, False):
-            raise TypeError("Cannot compare encrypted and unencrypted keys.")
-        if isinstance(other, Secret):
-            return self.secret == other.secret
-        if isinstance(other, SecureTag):
+        if isinstance(other, (Secret, SecureTag)):
+            if self.metadata.get(self.METADATA_ENCRYPTED, False) != other.metadata.get(self.METADATA_ENCRYPTED, False):
+                raise TypeError("Cannot compare encrypted and unencrypted keys.")
             return self.secret == other.secure
         return False
 
