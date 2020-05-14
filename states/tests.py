@@ -610,6 +610,14 @@ class YAMLSafeDump(TestCase):
             repr('test: !secure \'test_value\'\n'),
         )
 
+    def test_secret(self):
+        obj = {"test": storage.Secret('test_value')}
+        output = yaml.safe_dump(obj)
+        self.assertEqual(
+            repr(output),
+            repr('test: !Secret \'test_value\'\n'),
+        )
+
 
 class YAMLSafeLoad(TestCase):
     def setUp(self) -> None:

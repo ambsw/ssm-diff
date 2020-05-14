@@ -108,7 +108,7 @@ class Secret(yaml.YAMLObject):
 
     @classmethod
     def to_yaml(cls, dumper, data):
-        return dumper.represent_mapping(cls.yaml_tag, data.value)
+        return dumper.represent_scalar(cls.yaml_tag, data.secret)
 
 
 class JSONBranchEncoder(json.JSONEncoder):
@@ -362,7 +362,7 @@ class ParameterStore(object):
         p = self.ssm.get_paginator('describe_parameters')
         chunk_size = 50
         for i in range(0, len(ss_params), chunk_size):
-            for page in p.paginate(ParameterFilters=[ { 'Key': 'Name', 'Values': ss_params[i:i+chunk_size] } ]):
+            for page in p.paginate(ParameterFilters=[{'Key': 'Name', 'Values': ss_params[i:i+chunk_size]}]):
                 for param in page['Parameters']:
                     params[param['Name']]['KeyId'] = param['KeyId']
         return params
@@ -380,10 +380,10 @@ class ParameterStore(object):
                     ParameterFilters=self.parameter_filters,
                 ):
                     for param in page['Parameters']:
-                        params[param['Name']] = { 'Value': param['Value'], 'Type': param['Type'] }
+                        params[param['Name']] = {'Value': param['Value'], 'Type': param['Type']}
             params = self._enrich_metadata(params)
             for param_name, param_obj in params.items():
-                args = { 'value' : param_obj['Value'], 'ssm_type': param_obj['Type'], 'name': param_name }
+                args = {'value': param_obj['Value'], 'ssm_type': param_obj['Type'], 'name': param_name }
                 if 'KeyId' in param_obj:
                     args['key_id'] = param_obj['KeyId']
                 add(obj=output,
