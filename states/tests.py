@@ -566,7 +566,10 @@ class JSONBranch(TestCase):
             '{"child1": "value1", "child2": "value2"}',
         )
 
-    def test_simple_dump(self):
+
+class YAMLSafeDump(TestCase):
+    """Verify that safe_dump produces the expected output"""
+    def test_json_branch_simple_dump(self):
         """Allowed to nest a Secure tag in a JSON tag"""
         obj = yaml.safe_load('root: !JSON\n  child1: value1\n  child2: value2')
         output = yaml.safe_dump(obj)
@@ -575,14 +578,11 @@ class JSONBranch(TestCase):
             repr('root: \'{"child1": "value1", "child2": "value2"}\'\n'),
         )
 
-    def test_nested_secure(self):
+    def test_json_branch_nested_secure(self):
         """Not permitted to nest a Secure tag in a JSON tag"""
         obj = yaml.safe_load('root: !JSON\n  child1: !secure value1\n  child2: value2')
         with self.assertRaises(TypeError):
             yaml.safe_dump(obj)
-
-
-class SecureJSONBranch(TestCase):
 
     def test_nested_secure(self):
         """Allowed to nest a Secure tag in a JSON tag"""
@@ -593,9 +593,6 @@ class SecureJSONBranch(TestCase):
             repr('root: !Secret \'{"child1": "value1", "child2": "value2"}\'\n'),
         )
 
-
-class SecureTag(TestCase):
-
     def test_secure_tag(self):
         obj = {"test": storage.SecureTag('test_value')}
         output = yaml.safe_dump(obj)
@@ -605,8 +602,22 @@ class SecureTag(TestCase):
         )
 
 
-class ParameterStore(TestCase):
+class YAMLSafeLoad(TestCase):
+    def setUp(self) -> None:
+        self.store = storage.ParameterStore('test', engine.DiffResolver)
 
+    def test_prepare_secret(self):
+        value = 'root: !Secret\n  secret: test'
+        # other
+        output = yaml.safe_load(value)
+        self.assertEqual(
+            {'root': storage.Secret('test')},
+            output,
+        )
+
+
+class ParameterStorePrepare(TestCase):
+    """Verify that objects are prepared correctly for Parameter Store output"""
     def setUp(self) -> None:
         self.store = storage.ParameterStore('test', engine.DiffResolver)
 

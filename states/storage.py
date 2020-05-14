@@ -91,6 +91,14 @@ class Secret(yaml.YAMLObject):
             return self.secret == other.secure
         return False
 
+    @classmethod
+    def from_yaml(cls, loader, node):
+        return Secret(**loader.construct_mapping(node))
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_mapping(cls.yaml_tag, data.value)
+
 
 class JSONBranchEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -133,7 +141,10 @@ class JSONBranch(yaml.YAMLObject):
         assert isinstance(loader, yaml.SafeLoader)
         # ignore the top-level node
         node.tag = ''
-        value = loader.construct_mapping(node)
+        if isinstance(node, yaml.MappingNode):
+            value = loader.construct_mapping(node)
+        else:
+            value = json.loads(loader.construct_scalar(node))
         return cls(value)
 
     @classmethod
@@ -165,6 +176,9 @@ class SecretJSONBranch(JSONBranch, Secret):
 
     def __repr__(self):
         return "{}(secret={!r}, metadata={!r})".format(self.__class__.__name__, self.secret, self.metadata)
+
+    def __eq__(self, other):
+        return super().__eq__(other)
 
     @property
     def secret(self):
