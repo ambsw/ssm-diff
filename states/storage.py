@@ -86,7 +86,7 @@ class Secret(yaml.YAMLObject):
         return "{}(secret={!r}, metadata={!r})".format(self.__class__.__name__, self.secret, self.metadata)
 
     def __eq__(self, other):
-        if self.metadata[self.METADATA_ENCRYPTED] != other.metadata[self.METADATA_ENCRYPTED]:
+        if self.metadata.get(self.METADATA_ENCRYPTED, False) != other.metadata.get(self.METADATA_ENCRYPTED, False):
             raise TypeError("Cannot compare encrypted and unencrypted keys.")
         if isinstance(other, Secret):
             return self.secret == other.secret
@@ -360,7 +360,7 @@ class ParameterStore(object):
         return self._ssm
 
     def _enrich_metadata(self, params):
-        ss_params = [ k for k, v in params.items() if v["Type"] == "SecureString" ]
+        ss_params = [k for k, v in params.items() if v["Type"] == "SecureString"]
         p = self.ssm.get_paginator('describe_parameters')
         chunk_size = 50
         for i in range(0, len(ss_params), chunk_size):
@@ -385,7 +385,7 @@ class ParameterStore(object):
                         params[param['Name']] = {'Value': param['Value'], 'Type': param['Type']}
             params = self._enrich_metadata(params)
             for param_name, param_obj in params.items():
-                args = {'value': param_obj['Value'], 'ssm_type': param_obj['Type'], 'name': param_name }
+                args = {'value': param_obj['Value'], 'ssm_type': param_obj['Type'], 'name': param_name}
                 if 'KeyId' in param_obj:
                     args['key_id'] = param_obj['KeyId']
                 add(obj=output,
