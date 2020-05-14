@@ -89,6 +89,9 @@ class Secret(yaml.YAMLObject):
         if isinstance(other, (Secret, SecureTag)):
             if self.metadata.get(self.METADATA_ENCRYPTED, False) != other.metadata.get(self.METADATA_ENCRYPTED, False):
                 raise TypeError("Cannot compare encrypted and unencrypted keys.")
+        if isinstance(other, Secret):
+            return self.secret == other.secret
+        if isinstance(other, SecureTag):
             return self.secret == other.secure
         return False
 
