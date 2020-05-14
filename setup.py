@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from os import path
-from setuptools import setup
+from setuptools import find_packages, setup
 
 wd = path.abspath(path.dirname(__file__))
 with open(path.join(wd, 'README.md'), encoding='utf-8') as f:
@@ -19,8 +19,9 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords=['aws', 'ssm', 'parameter-store'],
-    packages=['states'],
-    scripts=['ssm-diff'],
+    packages=find_packages(),
+    scripts=[],
+    entry_points={'console_scripts': ['ssm-diff=ssmdiff.main:main']},
     install_requires=[
         'termcolor',
         'boto3',

@@ -66,7 +66,7 @@ def plan(args):
     print(DiffBase.describe_diff(remote.dry_run(local.get())))
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', help='local state yml file', action='store', dest='filename')
     parser.add_argument('--engine', '-e', help='diff engine to use when interacting with SSM', action='store', dest='engine', default='DiffResolver')
@@ -117,3 +117,6 @@ if __name__ == "__main__":
     args.filename = filename
 
     args.func(args)
+
+if __name__ == "__main__":
+    main()
