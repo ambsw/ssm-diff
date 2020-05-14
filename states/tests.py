@@ -569,13 +569,22 @@ class JSONBranch(TestCase):
 
 class YAMLSafeDump(TestCase):
     """Verify that safe_dump produces the expected output"""
-    def test_json_branch_simple_dump(self):
+    def test_json_branch_simple(self):
         """Allowed to nest a Secure tag in a JSON tag"""
         obj = yaml.safe_load('root: !JSON\n  child1: value1\n  child2: value2')
         output = yaml.safe_dump(obj)
         self.assertEqual(
             repr(output),
             repr('root: \'{"child1": "value1", "child2": "value2"}\'\n'),
+        )
+
+    def test_json_branch_secure(self):
+        """Allowed to nest a Secure tag in a JSON tag"""
+        obj = {'root': storage.SecretJSONBranch({'key': 'value'})}
+        output = yaml.safe_dump(obj)
+        self.assertEqual(
+            repr(output),
+            repr('root: !Secret \'{"key": "value"}\'\n'),
         )
 
     def test_json_branch_nested_secure(self):
@@ -608,10 +617,25 @@ class YAMLSafeLoad(TestCase):
 
     def test_prepare_secret(self):
         value = 'root: !Secret\n  secret: test'
-        # other
         output = yaml.safe_load(value)
         self.assertEqual(
-            {'root': storage.Secret('test')},
+            {'root': storage.SecretJSONBranch({"secret": "test"})},
+            output,
+        )
+
+    def test_secret_json_upconvert(self):
+        value = 'root: !Secret \'{"key": "value"}\'\n'
+        output = yaml.safe_load(value)
+        self.assertEqual(
+            {'root': storage.SecretJSONBranch({"key":"value"})},
+            output,
+        )
+
+    def test_secret_scalar(self):
+        value = 'root: !Secret \'value\'\n'
+        output = yaml.safe_load(value)
+        self.assertEqual(
+            {'root': storage.Secret('value')},
             output,
         )
 

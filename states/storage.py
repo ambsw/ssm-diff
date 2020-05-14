@@ -6,6 +6,7 @@ import logging
 import re
 import sys
 from copy import deepcopy
+from json import JSONDecodeError
 
 import boto3
 import termcolor
@@ -93,7 +94,17 @@ class Secret(yaml.YAMLObject):
 
     @classmethod
     def from_yaml(cls, loader, node):
-        return Secret(**loader.construct_mapping(node))
+        node.tag = ''
+        try:
+            return SecretJSONBranch.from_yaml(loader, node)
+        except JSONDecodeError:
+            pass
+        if isinstance(node, yaml.MappingNode):
+            value = loader.construct_mapping(node)
+            return Secret(**value)
+        else:
+            value = loader.construct_scalar(node)
+            return Secret(value)
 
     @classmethod
     def to_yaml(cls, dumper, data):
