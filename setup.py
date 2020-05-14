@@ -10,7 +10,7 @@ with open(path.join(wd, 'README.md'), encoding='utf-8') as f:
 setup(
     description='A tool to manage contents of AWS SSM Parameter Store',
     name='ssm-diff',
-    version='0.5',
+    version='0.5.1',
     author='Sergey Motovilovets',
     author_email='motovilovets.sergey@gmail.com',
     license='MIT',
